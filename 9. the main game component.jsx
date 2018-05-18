@@ -20,21 +20,31 @@ const Button = (props)=> {
 }
 
 const Answer = (props)=> {
+  
+
   return(
     <div className="col-5">
-     <span>5</span>
-     <span>7</span>
+      {
+        props.selectedNumber.map( (ele, i) => 
+        <span key={i}>{ele}</span>)
+      }
     </div>
   )
 }
 
 
 const Numbers = (props) => {
+  let selected = (num) => {
+    if (props.selectedNumber.indexOf(num) >= 0) {
+      return "selected"
+    }
+  }
+
   return (
     <div className="card text-center">
       <div>
         {Numbers.list.map( (ele, i)=> 
-          <span key={i}>{ele}</span>
+          <span key={i} className={selected(ele)}>{ele}</span>
         )}
       </div>
     </div>
@@ -43,6 +53,10 @@ const Numbers = (props) => {
 Numbers.list = _.range(1, 10)
 
 class Game extends React.Component {
+  state = {
+   selectedNumber: [2,4]
+  }
+
   render(){
     return(
       <div className="container">
@@ -51,10 +65,10 @@ class Game extends React.Component {
         <div className="row">
           <Stars />
           <Button />
-          <Answer />
+          <Answer selectedNumber={this.state.selectedNumber}/>
         </div>
         <br />
-        <Numbers />
+        <Numbers selectedNumber={this.state.selectedNumber}/>
       </div>
     )
   }
