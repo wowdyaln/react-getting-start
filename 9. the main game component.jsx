@@ -13,7 +13,7 @@ const Button = (props)=> {
   switch(props.answerIsCorrect){
     case true:
       button =
-        <button className="btn btn-success">
+        <button className="btn btn-success" onClick={props.acceptAnswer}>
           <i className="fa fa-check"></i>
         </button>
       break;
@@ -50,7 +50,10 @@ const Answer = (props)=> {
 
 
 const Numbers = (props) => {
-  let selected = (num) => {
+  let numClassName = (num) => {
+    if (props.usedNumbers.indexOf(num) >= 0) {
+      return "used"
+    }
     if (props.selectedNumbers.indexOf(num) >= 0) {
       return "selected"
     }
@@ -60,7 +63,7 @@ const Numbers = (props) => {
     <div className="card text-center">
       <div>
         {Numbers.list.map( (ele, i)=> 
-          <span key={i} className={selected(ele)} 
+          <span key={i} className={numClassName(ele)} 
                 onClick={ ()=> props.selectNum(ele)}>
             {ele}
           </span>
@@ -75,14 +78,17 @@ class Game extends React.Component {
   state = {
    selectedNumbers: [],
    numberOfStars: 1 + Math.floor(Math.random() * 9),  // state 可以每次隨機生成
+   usedNumbers: [],
    answerIsCorrect: null,
   }
 
   selectNum = (num)=> {
-    if (this.state.selectedNumbers.indexOf(num) >= 0){
+    if (this.state.selectedNumbers.indexOf(num) >= 0 || 
+        this.state.usedNumbers.indexOf(num) >= 0){
       return
     } else {
       this.setState( prevState => ({
+        answerIsCorrect: null,
         selectedNumbers: prevState.selectedNumbers.concat(num)
       }))
     }
@@ -101,9 +107,19 @@ class Game extends React.Component {
     }))
   }
 
+  acceptAnswer = () => {
+    this.setState( prevState => ({
+      usedNumbers: prevState.usedNumbers.concat(prevState.selectedNumbers),
+      selectedNumbers: [],
+      answerIsCorrect: null,
+      numberOfStars: 1 + Math.floor(Math.random() * 9)
+    }))
+  }
+
   render(){
     const { selectedNumbers,
             numberOfStars,
+            usedNumbers,
             answerIsCorrect,
           } = this.state 
     return(
@@ -114,13 +130,15 @@ class Game extends React.Component {
           <Stars numberOfStars = {numberOfStars}/>
           <Button selectedNumbers={selectedNumbers}
                   answerIsCorrect={answerIsCorrect}
-                  checkAnswer={this.checkAnswer}/>
+                  checkAnswer={this.checkAnswer}
+                  acceptAnswer={this.acceptAnswer}/>
           <Answer selectedNumbers={selectedNumbers}
                   unselectNum = {this.unselectNum}/>
         </div>
         <br />
         <Numbers selectedNumbers={selectedNumbers}
-                 selectNum={this.selectNum}/>
+                 selectNum={this.selectNum}
+                 usedNumbers={usedNumbers}/>
       </div>
     )
   }
