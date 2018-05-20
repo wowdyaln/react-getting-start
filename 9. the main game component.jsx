@@ -1,7 +1,4 @@
 const Stars = (props)=> {
-  // const numberOfStars = 1 + Math.floor(Math.random()*9)
-
-
   return(
     <div className="col-5">
       {_.range(props.numberOfStars).map( ele => 
@@ -20,13 +17,11 @@ const Button = (props)=> {
 }
 
 const Answer = (props)=> {
-  
-
   return(
     <div className="col-5">
       {
         props.selectedNumbers.map( (ele, i) => 
-        <span key={i}>{ele}</span>)
+        <span key={i} onClick={()=> props.unselectNum(ele)}>{ele}</span>)
       }
     </div>
   )
@@ -58,7 +53,7 @@ Numbers.list = _.range(1, 10)
 class Game extends React.Component {
   state = {
    selectedNumbers: [],
-   numberOfStars: 1 + Math.floor(Math.random() * 9)
+   numberOfStars: 1 + Math.floor(Math.random() * 9)  // state 可以每次隨機生成
   }
 
   selectNum = (num)=> {
@@ -71,6 +66,12 @@ class Game extends React.Component {
     }
   }
 
+  unselectNum = (num) => {
+      this.setState( prevState => ({
+        selectedNumbers: prevState.selectedNumbers.filter( ele => ele !== num)
+      }))
+  }
+
   render(){
     return(
       <div className="container">
@@ -79,7 +80,8 @@ class Game extends React.Component {
         <div className="row">
           <Stars numberOfStars = {this.state.numberOfStars}/>
           <Button />
-          <Answer selectedNumbers={this.state.selectedNumbers}/>
+          <Answer selectedNumbers={this.state.selectedNumbers}
+                  unselectNum = {this.unselectNum}/>
         </div>
         <br />
         <Numbers selectedNumbers={this.state.selectedNumbers}
