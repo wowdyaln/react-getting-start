@@ -80,13 +80,27 @@ const Numbers = (props) => {
 }
 Numbers.list = _.range(1, 10)
 
+const DoneFrame = (props) => {
+  return(
+    <div className="card text-center">
+      <h2>{props.doneStatus}</h2>
+    </div>
+  )
+}
+
 class Game extends React.Component {
+
+  static randomNum(){
+    return 1 + Math.floor(Math.random() * 9)
+  }
+
   state = {
    selectedNumbers: [],
-   numberOfStars: 1 + Math.floor(Math.random() * 9),  // state 可以每次隨機生成
+   numberOfStars: Game.randomNum(),  // state 可以每次隨機生成
    usedNumbers: [],
    answerIsCorrect: null,
    redraws: 5,
+   doneStatus: 'game over !',
   }
 
   selectNum = (num)=> {
@@ -119,14 +133,14 @@ class Game extends React.Component {
       usedNumbers: prevState.usedNumbers.concat(prevState.selectedNumbers),
       selectedNumbers: [],
       answerIsCorrect: null,
-      numberOfStars: 1 + Math.floor(Math.random() * 9)
+      numberOfStars: Game.randomNum()
     }))
   }
 
   redraw = () => {
     if (this.state.redraws === 0){return}
     this.setState(prevState => ({
-      numberOfStars: 1 + Math.floor(Math.random() * 9),
+      numberOfStars: Game.randomNum(),
       answerIsCorrect: null,
       selectedNumbers: [],
       redraws: prevState.redraws - 1,
@@ -139,6 +153,7 @@ class Game extends React.Component {
             usedNumbers,
             answerIsCorrect,
             redraws,
+            doneStatus,
           } = this.state 
     return(
       <div className="container">
@@ -156,9 +171,14 @@ class Game extends React.Component {
                   unselectNum = {this.unselectNum}/>
         </div>
         <br />
+        {/* 以下語法很強大 if true ? : 直接寫在 return() 裡面  */}
+        {doneStatus ? 
+        <DoneFrame doneStatus={doneStatus}/> :
+
         <Numbers selectedNumbers={selectedNumbers}
-                 selectNum={this.selectNum}
-                 usedNumbers={usedNumbers}/>
+                selectNum={this.selectNum}
+                usedNumbers={usedNumbers}/>
+        }
       </div>
     )
   }
