@@ -25,14 +25,20 @@ const Button = (props)=> {
       break;
     default:
       button =
-        <button className="btn" 
+        <button className="btn btn-secondary" 
         onClick={props.checkAnswer} 
         disabled={props.selectedNumbers.length === 0}>=</button>
       break;
   }
   return(
-    <div className="col-2">
+    <div className="col-2 text-center">
       {button}
+      <br /><br />
+      <button className="btn btn-warning btn-sm"
+              onClick={props.redraw}
+              disabled={props.redraws === 0}>
+        <i className="fa fa-sync"></i> {props.redraws}
+      </button>
     </div>
   )
 }
@@ -80,6 +86,7 @@ class Game extends React.Component {
    numberOfStars: 1 + Math.floor(Math.random() * 9),  // state 可以每次隨機生成
    usedNumbers: [],
    answerIsCorrect: null,
+   redraws: 5,
   }
 
   selectNum = (num)=> {
@@ -116,11 +123,22 @@ class Game extends React.Component {
     }))
   }
 
+  redraw = () => {
+    if (this.state.redraws === 0){return}
+    this.setState(prevState => ({
+      numberOfStars: 1 + Math.floor(Math.random() * 9),
+      answerIsCorrect: null,
+      selectedNumbers: [],
+      redraws: prevState.redraws - 1,
+    }))
+  }
+
   render(){
     const { selectedNumbers,
             numberOfStars,
             usedNumbers,
             answerIsCorrect,
+            redraws,
           } = this.state 
     return(
       <div className="container">
@@ -131,7 +149,9 @@ class Game extends React.Component {
           <Button selectedNumbers={selectedNumbers}
                   answerIsCorrect={answerIsCorrect}
                   checkAnswer={this.checkAnswer}
-                  acceptAnswer={this.acceptAnswer}/>
+                  acceptAnswer={this.acceptAnswer}
+                  redraws={redraws}
+                  redraw={this.redraw}/>
           <Answer selectedNumbers={selectedNumbers}
                   unselectNum = {this.unselectNum}/>
         </div>
