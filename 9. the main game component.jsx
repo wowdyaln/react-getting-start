@@ -1,3 +1,21 @@
+let possibleCombinationSum = function (arr, n) {
+  if (arr.indexOf(n) >= 0) { return true; }
+  if (arr[0] > n) { return false; }
+  if (arr[arr.length - 1] > n) {
+    arr.pop();
+    return possibleCombinationSum(arr, n);
+  }
+  let listSize = arr.length, combinationsCount = (1 << listSize)
+  for (let i = 1; i < combinationsCount; i++) {
+    let combinationSum = 0;
+    for (let j = 0; j < listSize; j++) {
+      if (i & (1 << j)) { combinationSum += arr[j]; }
+    }
+    if (n === combinationSum) { return true; }
+  }
+  return false;
+};
+
 const Stars = (props)=> {
   return(
     <div className="col-5">
@@ -84,6 +102,9 @@ const DoneFrame = (props) => {
   return(
     <div className="card text-center">
       <h2>{props.doneStatus}</h2>
+      <button className="btn btn-primary"
+              onClick= {props.resetGame}
+              >Play again</button>
     </div>
   )
 }
@@ -94,14 +115,18 @@ class Game extends React.Component {
     return 1 + Math.floor(Math.random() * 9)
   }
 
-  state = {
-   selectedNumbers: [],
-   numberOfStars: Game.randomNum(),  // state 可以每次隨機生成
-   usedNumbers: [],
-   answerIsCorrect: null,
-   redraws: 5,
-   doneStatus: 'game over !',
+  static initialState(){
+    return {
+      selectedNumbers: [],
+      numberOfStars: Game.randomNum(),  // state 可以每次隨機生成
+      usedNumbers: [],
+      answerIsCorrect: null,
+      redraws: 5,
+      doneStatus: null,
+    }
   }
+  // status
+  state = Game.initialState()
 
   selectNum = (num)=> {
     if (this.state.selectedNumbers.indexOf(num) >= 0 || 
@@ -134,7 +159,7 @@ class Game extends React.Component {
       selectedNumbers: [],
       answerIsCorrect: null,
       numberOfStars: Game.randomNum()
-    }))
+    }), this.updateDoneStatus)
   }
 
   redraw = () => {
@@ -144,7 +169,31 @@ class Game extends React.Component {
       answerIsCorrect: null,
       selectedNumbers: [],
       redraws: prevState.redraws - 1,
-    }))
+    }), this.updateDoneStatus)
+  }
+
+  // return true / false
+  possibleSolutions = ({numberOfStars, usedNumbers})=> {
+    const possibleNumbers = _.range(1,10).filter( num => {
+      usedNumbers.indexOf(num) === -1
+    })
+
+    return possibleCombinationSum(possibleNumbers, numberOfStars)
+  }
+
+  updateDoneStatus = () => {
+    this.setState( prevState => {
+      if (prevState.usedNumbers.length === 9){
+        return { doneStatus: 'Done. Good Job!'}
+      }
+      if (prevState.redraws === 0 && !this.possibleSolutions(prevState)) {
+        return { doneStatus: 'Game Over'}
+      }
+    })
+  }
+
+  resetGame = () => {
+    this.setState(Game.initialState())
   }
 
   render(){
@@ -173,7 +222,8 @@ class Game extends React.Component {
         <br />
         {/* 以下語法很強大 if true ? : 直接寫在 return() 裡面  */}
         {doneStatus ? 
-        <DoneFrame doneStatus={doneStatus}/> :
+        <DoneFrame doneStatus={doneStatus}
+                   resetGame={this.resetGame}/> :
 
         <Numbers selectedNumbers={selectedNumbers}
                 selectNum={this.selectNum}
